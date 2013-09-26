@@ -15,29 +15,30 @@
   (apply str (butlast (rest w))))
 
 (defn is-lastchar-special? [w]
-  (not (Char/IsLetterOrDigit (last w))))
+  (or (not (nil? w)) (not (Char/IsLetterOrDigit (last w)))))
 
-(defn mix-up-word [w]
-  (let [cw (if (is-lastchar-special? w) (apply str (butlast w)) w )
+(defn shuffle-word [w]
+  (let [special? (is-lastchar-special? w)
+        cw (if special? (apply str (butlast w)) w )
         sw (str (first cw)
                 (mix-up-content (word-without-bound cw))
                 (last (rest cw)))
-        rw (if (is-lastchar-special? w) (str sw (last w)) sw)]
+        rw (if special? (str sw (last w)) sw)]
     rw))
 
 (defn to-words [s]
   (split s #"\s"))
 
-(defn mix-up-paragraph [s]
+(defn shuffle-paragraph [s]
   (let [ws (to-words s)
-        mws (map mix-up-word ws)]
+        mws (map shuffle-word ws)]
     (apply str (interpose " " mws))))
 
-(defn mix-up-string [s]
+(defn shuffle-content [s]
   (let [ps (split-lines s)
-        mps (map mix-up-paragraph ps)]
+        mps (map shuffle-paragraph ps)]
     (apply str (interpose "\r\n" mps))))
 
 (defn shuffle-file-content [in-file out-file]
   (let [s (slurp in-file)]
-    (spit out-file  (mix-up-string s))))
+    (spit out-file  (shuffle-content s))))
